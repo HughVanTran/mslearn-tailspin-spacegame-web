@@ -8,5 +8,23 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
+  displayName: 'Install .NET SDK'
+
+- script: dotnet restore
+  displayName: 'Restore dependencies'
+
 - script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+  displayName: 'Build project'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+  displayName: 'NuGet Security Analysis'
+
+- script: dotnet test --configuration $(buildConfiguration) --no-build
+  displayName: 'Run tests'
